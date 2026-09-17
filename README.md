@@ -1,0 +1,102 @@
+
+
+<!-- README.md is generated from README.qmd. Please edit that file -->
+
+# ggsegThalamus
+
+<!-- badges: start -->
+
+[![R-CMD-check](https://github.com/ggsegverse/ggsegThalamus/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ggsegverse/ggsegThalamus/actions/workflows/R-CMD-check.yaml)
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+<!-- badges: end -->
+
+Thalamic nuclei parcellations for the ggseg ecosystem.
+
+Two published atlases of the thalamus, from different modalities:
+
+| Atlas | Nuclei per hemisphere | Derived from |
+|----|----|----|
+| `thalamus_hcp()` | 7 | HCP diffusion MRI (Najdenovska et al. 2018) |
+| `thalamus_thomas()` | 12 | White-matter-nulled MPRAGE (Su et al. 2019) |
+
+THOMAS is the finer of the two, and the only one to separate the
+geniculate nuclei, the habenula and the mammillothalamic tract.
+
+Because these atlases subdivide the thalamus alone, the surrounding deep
+grey structures are kept as grey anatomical context rather than cleared.
+
+Labels keep the identifiers the published lookup tables use, `region` is
+those stripped of the hemisphere and lower-cased, and a `name` column
+carries the spelled-out nucleus name for printing.
+
+For the FreeSurfer thalamic segmentation, a different atlas again, see
+[`ggsegFreeSurfer`](https://github.com/ggsegverse/ggsegFreeSurfer).
+
+## Atlas Citations
+
+> Najdenovska E, Alemán-Gómez Y, Battistella G, et al. (2018). “In-vivo
+> probabilistic atlas of human thalamic nuclei based on
+> diffusion-weighted magnetic resonance imaging.” *Scientific Data*, 5,
+> 180270. DOI:
+> [10.1038/sdata.2018.270](https://doi.org/10.1038/sdata.2018.270)
+
+> Su JH, Thomas FT, Kasoff WS, et al. (2019). “Thalamus Optimized Multi
+> Atlas Segmentation (THOMAS): fast, fully automated segmentation of
+> thalamic nuclei from structural MRI.” *NeuroImage*, 194, 272-282. DOI:
+> [10.1016/j.neuroimage.2019.03.021](https://doi.org/10.1016/j.neuroimage.2019.03.021)
+
+If you use this atlas in your work, please cite both the original atlas
+publication and the ggseg package:
+
+> Mowinckel AM, Vidal-Pineiro D (2020). “Visualization of Brain
+> Statistics With R Packages ggseg and ggseg3d.” *Advances in Methods
+> and Practices in Psychological Science*, 3(4), 466-483. DOI:
+> [10.1177/2515245920928009](https://doi.org/10.1177/2515245920928009)
+
+## Installation
+
+We recommend installing the ggseg-atlases through the ggsegverse
+[r-universe](https://ggsegverse.r-universe.dev/#builds):
+
+``` r
+options(repos = c(
+  ggsegverse = "https://ggsegverse.r-universe.dev",
+  CRAN = "https://cloud.r-project.org"
+))
+
+install.packages("ggsegThalamus")
+```
+
+You can install this package from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("ggsegverse/ggsegThalamus")
+```
+
+## Usage
+
+``` r
+library(ggseg)
+library(ggsegThalamus)
+
+plot(thalamus_hcp())
+```
+
+<img src="man/figures/README-plot-hcp-1.png" style="width:100.0%" />
+
+The finer THOMAS segmentation:
+
+``` r
+plot(thalamus_thomas())
+```
+
+<img src="man/figures/README-plot-thomas-1.png" style="width:100.0%" />
+
+## Code of Conduct
+
+Please note that the ggsegThalamus project is released with a
+[Contributor Code of
+Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.
