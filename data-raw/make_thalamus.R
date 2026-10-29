@@ -10,8 +10,8 @@
 # Both ship as labelled volumes on the FSL-MNI152 grid with no anatomical
 # context, so as with the other MNI152 subcortical atlases in the ggsegverse
 # they are embedded into the fsaverage5 aseg with
-# prepare_subcortical_mni152(), and aseg_context() then demotes the
-# surrounding brain to grey.
+# prepare_subcortical_mni152(), which declares the surrounding brain as grey
+# anatomical context.
 #
 # Unlike the whole-subcortex atlases, these cover the thalamus alone, so only
 # the aseg's thalamus is cleared. The default replaces every lumped
@@ -147,7 +147,7 @@ read_lut <- function(atlas) {
 # background the rest sits on and the only geometry present in every view.
 draw_order <- function(atlas) {
   drawn <- atlas_geom(atlas)$label
-  is_silhouette <- grepl("^cortex", drawn)
+  is_silhouette <- drawn %in% ggseg.formats::atlas_context(atlas)
   by_structure <- function(x) {
     x[order(
       toupper(sub("_(Left|Right)$", "", x)),
@@ -220,17 +220,47 @@ build_atlas <- function(atlas) {
   # and read as shapes, so they take a heavy pass; the silhouette is a
   # gyrified ribbon whose detail *is* the anatomy, and smoothing it that hard
   # closes the sulci and fills the interior back in.
+  # No demotion step: `prepare_subcortical_mni152()` declares the surrounding
+  # anatomy as context in the table it returns, and the table is what decides
+  # what is drawn.
+  #
+  # It declares all of it, so the cerebral white matter arrives as a solid
+  # shape filling the inside of the cortical ribbon, which reads as a blob
+  # rather than as cortex. Punch it out of the ribbon, then drop the
+  # structures this atlas does not want behind its nuclei. The punch comes
+  # first: remove the white matter and there is nothing left to subtract.
+  # Only the cerebral white matter goes; the cerebellar white matter stays,
+  # or the cerebellum thins to a sliver instead of reading as a solid
+  # structure. Both operands are aseg labels, so they are spelled, not
+  # guessed.
   out <- raw |>
-    aseg_context(
-      focus = paste(lut$label, collapse = "|"),
+    ggseg.formats::atlas_region_op(
+      x = "Cerebral-Cortex$",
+      y = "Cerebral-White-Matter$",
+      action = "difference",
+      into = "cortex"
+    ) |>
+    ggseg.formats::atlas_region_remove(
+      paste(
+        "Cerebral-Cortex$",
+        "Cerebral-White-Matter",
+        "WM-hypointensities",
+        "-Ventricle",
+        "-Vent$",
+        "CSF",
+        "choroid-plexus",
+        "vessel",
+        "CC_",
+        sep = "|"
+      ),
       match_on = "label"
     ) |>
     atlas_view_gather() |>
-    atlas_dilate(0.6, exclude = "^cortex") |>
-    atlas_simplify(keep = 0.2, labels = "^cortex") |>
-    atlas_simplify(keep = 0.35, exclude = "^cortex") |>
-    atlas_smooth(smoothness = 0.3, labels = "^cortex") |>
-    atlas_smooth(smoothness = 0.9, exclude = "^cortex") |>
+    atlas_dilate(0.6, exclude = ggseg.formats::context()) |>
+    atlas_simplify(keep = 0.2, labels = ggseg.formats::context()) |>
+    atlas_simplify(keep = 0.35, exclude = ggseg.formats::context()) |>
+    atlas_smooth(smoothness = 0.3, labels = ggseg.formats::context()) |>
+    atlas_smooth(smoothness = 0.9, exclude = ggseg.formats::context()) |>
     draw_order()
 
   out <- atlas_core_add(
